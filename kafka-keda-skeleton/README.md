@@ -23,6 +23,40 @@
 }
 ```
 
+### 실행 방법
+
+#### 단일 노드 (개발용)
+```bash
+# Kafka 단일 노드 시작
+docker-compose up -d
+
+# 애플리케이션 실행
+./gradlew bootRun
+```
+
+#### 클러스터 모드 (운영 환경 테스트)
+```bash
+# Kafka 클러스터 시작 (3개 노드)
+docker-compose -f compose-cluster.yaml up -d
+
+# 애플리케이션 설정에서 bootstrap servers 변경
+# application.properties에서 아래와 같이 수정:
+# spring.kafka.bootstrap-servers=localhost:9092,localhost:9093,localhost:9094
+```
+
+#### API 테스트
+```bash
+# 단일 주문 생성
+curl -X POST http://localhost:8080/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"user-123","productName":"Laptop","amount":1500.0}'
+
+# 대량 주문 생성 (부하 테스트)
+curl -X POST "http://localhost:8080/api/orders/bulk?count=2000&userId=test-user"
+
+# Kafka UI 접속: http://localhost:8080
+```
+
 ### 코드 작성 예시
 - 스텝바이스텝으로 설명
 - 주석 및 코멘트를 잘달아줘
