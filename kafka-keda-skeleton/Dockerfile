@@ -1,4 +1,6 @@
-FROM azul/zulu-openjdk:24-jre-latest
+#FROM azul/zulu-openjdk:24-jre-latest
+FROM azul/zulu-openjdk:24-jdk-crac-latest
+
 
 # 작업 디렉토리 설정
 WORKDIR /app
