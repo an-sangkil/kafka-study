@@ -56,7 +56,8 @@ docker-compose up -d            # Start Kafka (KRaft mode) and Kafka UI
 ### Docker & Kubernetes
 ```bash
 docker build -t kafka-keda-skeleton .   # Build Docker image
-kubectl apply -f k8s/            # Deploy to Kubernetes with KEDA scaling
+kubectl create namespace kafka-keda-study # 네임스페이스 생성 
+kubectl apply -f keda-scaledobject.yaml -n kafka-keda-study            # Deploy to Kubernetes with KEDA scaling
 ```
 
 The project includes Spring Boot DevTools for hot reloading during development.

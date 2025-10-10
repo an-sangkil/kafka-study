@@ -2,7 +2,7 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: kafka-consumer-scaler
-  namespace: default
+  namespace: kafka-keda-study
 spec:
   # 스케일링 대상 Deployment
   scaleTargetRef:
@@ -35,7 +35,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-keda-skeleton-deployment
-  namespace: default
+  namespace: kafka-keda-study
   labels:
     app: kafka-keda-skeleton
 spec:
@@ -51,6 +51,7 @@ spec:
       containers:
       - name: kafka-keda-skeleton
         image: kafka-keda-skeleton:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
@@ -88,7 +89,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka-keda-skeleton-service
-  namespace: default
+  namespace: kafka-keda-study
 spec:
   selector:
     app: kafka-keda-skeleton
