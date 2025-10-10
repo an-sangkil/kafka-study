@@ -1,5 +1,6 @@
 services:
   kafka-1:
+    user: root
     image: confluentinc/cp-kafka:7.4.0
     hostname: kafka-1
     container_name: kafka-1
@@ -8,6 +9,7 @@ services:
       - "9101:9101"
     environment:
       # KRaft 클러스터 설정 - 노드 1 (브로커 + 컨트롤러)
+      CLUSTER_ID: "5tU1lP-kS9uH_fT8pA2v-1"
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093'
@@ -37,8 +39,16 @@ services:
       KAFKA_JMX_HOSTNAME: localhost
     volumes:
       - kafka-1-logs:/tmp/kraft-combined-logs
+    command: >
+      sh -c "
+        echo '🔧 Fixing permissions on /tmp/kraft-combined-logs...' &&
+        chown -R 1001:1001 /tmp/kraft-combined-logs &&
+        exec /etc/confluent/docker/run
+      "
+
 
   kafka-2:
+    user: root
     image: confluentinc/cp-kafka:7.4.0
     hostname: kafka-2
     container_name: kafka-2
@@ -47,6 +57,7 @@ services:
       - "9102:9102"
     environment:
       # KRaft 클러스터 설정 - 노드 2 (브로커 + 컨트롤러)
+      CLUSTER_ID: "5tU1lP-kS9uH_fT8pA2v-2"
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 2
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093'
@@ -78,6 +89,7 @@ services:
       - kafka-2-logs:/tmp/kraft-combined-logs
 
   kafka-3:
+    user: root
     image: confluentinc/cp-kafka:7.4.0
     hostname: kafka-3
     container_name: kafka-3
@@ -86,6 +98,7 @@ services:
       - "9103:9103"
     environment:
       # KRaft 클러스터 설정 - 노드 3 (브로커 + 컨트롤러)
+      CLUSTER_ID: "5tU1lP-kS9uH_fT8pA2v-3"
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 3
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093'
