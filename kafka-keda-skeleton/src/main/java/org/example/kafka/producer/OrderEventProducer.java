@@ -30,8 +30,7 @@ public class OrderEventProducer {
      * @param orderEvent 전송할 주문 이벤트
      */
     public void sendOrderEvent(OrderEvent orderEvent) {
-        log.info("주문 이벤트 전송 시작 - orderId: {}, userId: {}", 
-                 orderEvent.getOrderId(), orderEvent.getUserId());
+        log.info("주문 이벤트 전송 시작 - orderId: {}, userId: {}",  orderEvent.getOrderId(), orderEvent.getUserId());
         
         // 파티션 키로 userId 사용 (동일한 사용자의 메시지는 같은 파티션으로)
         CompletableFuture<SendResult<String, OrderEvent>> future = 

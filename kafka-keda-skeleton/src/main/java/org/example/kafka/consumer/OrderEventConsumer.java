@@ -39,8 +39,8 @@ public class OrderEventConsumer {
             @Header(KafkaHeaders.OFFSET) long offset,
             Acknowledgment acknowledgment) {
         
-        log.info("주문 이벤트 수신 시작 - orderId: {}, userId: {}, partition: {}, offset: {}", 
-                 orderEvent.getOrderId(), orderEvent.getUserId(), partition, offset);
+        log.info("주문 이벤트 수신 시작 - orderId: {}, userId: {}, partition: {}, offset: {}"
+                ,  orderEvent.getOrderId(), orderEvent.getUserId(), partition, offset);
         
         try {
             // 비즈니스 로직 처리
@@ -49,12 +49,10 @@ public class OrderEventConsumer {
             // 처리 완료 후 수동 커밋
             acknowledgment.acknowledge();
             
-            log.info("주문 이벤트 처리 완료 - orderId: {}, userId: {}", 
-                     orderEvent.getOrderId(), orderEvent.getUserId());
+            log.info("주문 이벤트 처리 완료 - orderId: {}, userId: {}",  orderEvent.getOrderId(), orderEvent.getUserId());
             
         } catch (Exception ex) {
-            log.error("주문 이벤트 처리 실패 - orderId: {}, error: {}", 
-                      orderEvent.getOrderId(), ex.getMessage(), ex);
+            log.error("주문 이벤트 처리 실패 - orderId: {}, error: {}",  orderEvent.getOrderId(), ex.getMessage(), ex);
             // 에러 발생 시 재시도 로직이나 DLQ 전송 등의 처리 가능
             throw ex; // 재시도를 위해 예외를 다시 던짐
         }
@@ -76,7 +74,6 @@ public class OrderEventConsumer {
             Thread.currentThread().interrupt();
         }
         
-        log.info("비즈니스 로직 처리 완료 - 주문: {}, 상품: {}, 금액: {}", 
-                 orderEvent.getOrderId(), orderEvent.getProductName(), orderEvent.getAmount());
+        log.info("비즈니스 로직 처리 완료 - 주문: {}, 상품: {}, 금액: {}", orderEvent.getOrderId(), orderEvent.getProductName(), orderEvent.getAmount());
     }
 }
