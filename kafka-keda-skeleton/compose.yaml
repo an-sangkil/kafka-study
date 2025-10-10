@@ -1,6 +1,6 @@
 services:
   kafka:
-    image: confluentinc/cp-kafka:7.4.0
+    image: confluentinc/cp-kafka:latest
     hostname: kafka
     container_name: kafka
     ports:
@@ -9,6 +9,7 @@ services:
       - "29093:29093"  # Controller port
     environment:
       # KRaft mode configuration (브로커 + 컨트롤러 역할)
+      #KAFKA_UID: 1000
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
@@ -31,12 +32,14 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      CLUSTER_ID: "5tU1lP-kS9uH_fT8pA2v-w" # 위에 생성한 UUID로 교체
       
       # JMX 모니터링
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
     volumes:
-      - kafka-logs:/tmp/kraft-combined-logs
+      - ./kafka-logs:/tmp/kraft-combined-logs
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
