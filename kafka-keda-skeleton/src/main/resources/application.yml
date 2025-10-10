@@ -6,6 +6,9 @@ spring:
       kafka-local: single-node
       local: single-node
       dev: kafka-cluster, common
+
+server:
+  port: 8080
 ---
 spring:
   config:
