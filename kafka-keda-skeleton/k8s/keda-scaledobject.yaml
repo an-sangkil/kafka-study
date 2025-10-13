@@ -21,7 +21,7 @@ spec:
   - type: kafka
     metadata:
       # Kafka 브로커 주소
-      bootstrapServers: kafka.kafka-keda-study.svc.cluster.local:9092
+      bootstrapServers: kafka.kafka-nm.svc.cluster.local:9092
       # 모니터링할 컨슈머 그룹
       consumerGroup: order-processing-group
       # 모니터링할 토픽
@@ -57,7 +57,7 @@ spec:
         env:
         # Kafka 브로커 주소 (k8s 내부)
         - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-          value: "kafka:9092"
+          value: "kafka.kafka-nm.svc.cluster.local:9092"
         # 컨슈머 그룹 설정
         - name: SPRING_KAFKA_CONSUMER_GROUP_ID
           value: "order-processing-group"
@@ -72,18 +72,18 @@ spec:
             memory: "512Mi"
             cpu: "500m"
         # 헬스체크 설정
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
+#        livenessProbe:
+#          httpGet:
+#            path: /actuator/health
+#            port: 8080
+#          initialDelaySeconds: 60
+#          periodSeconds: 30
+#        readinessProbe:
+#          httpGet:
+#            path: /actuator/health
+#            port: 8080
+#          initialDelaySeconds: 30
+#          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
