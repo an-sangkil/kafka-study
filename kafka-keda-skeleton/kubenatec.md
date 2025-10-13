@@ -16,20 +16,24 @@ kubectl apply -f ./k8s/keda-scaledobject.yaml
 kubectl delete -f ./k8s/kafka-deployment.yaml
 kubectl delete -f ./k8s/keda-scaledobject.yaml
 
-```bash
-kafka 같이 local에 로그 및 데이터를 유지하기 위해서는 type을 stateful을 사용하게 되는데 
+
+##### statefulset 및 pvc 삭제
+kafka 같이 local에 로그 및 데이터를 유지하기 위해서는 type을 stateful을 사용하게 되는데
 해당 상황에서는 서비스를 삭재해도 type이 statefulest, pvc 인경우엔 삭제되지 않고 유지된다.
 
 때문에 기존 설정정보(host 등등)을 가지고 있을수 있음으로, statefulset 및 pvc 또한 삭제 하자
-이후 다시 kubectl apply -f ... 을 실행하면 정사적인것을 확인 할 수 있다.   
+이후 다시 kubectl apply -f ... 을 실행하면 정사적인것을 확인 할 수 있다.
 
+```bash
 # statefulset 및 pvc 삭제
 kubectl delete statefulset -n kafka-nm kafka
 kubectl delete pvc -n kafka-nm kafka-data-kafka-0 
 ```
 
-kubectl get svc(serivce) -n kafka-nm
-kubectl get pods -n kafka-nm
+##### kafka-nm 네임스페이스 서비스 체크
+- svc(serivce) 는 약어 입니다.
+  kubectl get svc -n kafka-nm
+  kubectl get pods -n kafka-nm
 
 ##### 실시간 로그 
 kubectl logs -f  kafka-0 -n kafka-nm
@@ -52,6 +56,20 @@ kubectl logs -f -l app=kafka-keda-skeleton -n order-service
 
 
 
+##### kafka
+토픽 저보 확인 
+kubectl exec -n kafka-keda-study kafka-0 -- kafka-topics --bootstrap-server localhost:9092 --list
 
 
+##### keda 정보 체크 
+```bash
+kubectl get pod -n keda -l app=keda-operator -o wide
+NAME                             READY   STATUS    RESTARTS        AGE     IP           NODE                   NOMINATED NODE   READINESS GATES
+keda-operator-6687649c57-m6bkc   1/1     Running   1 (2d23h ago)   2d23h   10.42.0.51   lima-rancher-desktop   <none>           <none>
+ 
+```
 
+
+##### 테스트를 위한 forward 설징
+kubectl port-forward <service-name> <local-port>:<service-port> -n <namespace>
+kubectl port-forward service/kafka-keda-skeleton-service 8080:8080 -n order-service
