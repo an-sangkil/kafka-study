@@ -28,7 +28,10 @@
 #### 단일 노드 (개발용)
 ```bash
 # Kafka 단일 노드 시작
-docker-compose up -d
+docker-compose up -d -f ./compose.yaml
+
+# kafka 클러스트 모드  시작
+docker-compose up -d -f ./compose-cluster.yaml
 
 # 애플리케이션 실행
 ./gradlew bootRun
