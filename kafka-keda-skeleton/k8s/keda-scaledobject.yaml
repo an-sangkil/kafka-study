@@ -2,7 +2,7 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: kafka-consumer-scaler
-  namespace: kafka-keda-study
+  namespace: order-service
 spec:
   # 스케일링 대상 Deployment
   scaleTargetRef:
@@ -35,7 +35,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-keda-skeleton-deployment
-  namespace: kafka-keda-study
+  namespace: order-service
   labels:
     app: kafka-keda-skeleton
 spec:
@@ -89,7 +89,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka-keda-skeleton-service
-  namespace: kafka-keda-study
+  namespace: order-service
 spec:
   selector:
     app: kafka-keda-skeleton
