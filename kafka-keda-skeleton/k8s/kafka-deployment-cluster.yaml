@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: kafka-nm
+  labels:
+    app: kafka
+spec:
+  ports:
+  - port: 9092
+    name: client
+    targetPort: 9092
+  - port: 9093
+    name: controller
+    targetPort: 9093
+  selector:
+    app: kafka
+  clusterIP: None  # Headless service for StatefulSet
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: kafka-nm
+  labels:
+    app: kafka
+spec:
+  serviceName: kafka
+  replicas: 3  # 클러스터 모드: 3개의 Kafka 브로커
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+      - name: kafka
+        image: confluentinc/cp-kafka:7.5.0
+        ports:
+        - containerPort: 9092
+          name: client
+        - containerPort: 9093
+          name: controller
+        env:
+        # KRaft 모드 설정 (Zookeeper 없이 실행)
+        # StatefulSet ordinal을 사용하여 각 pod마다 고유한 NODE_ID 부여
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KAFKA_NODE_ID
+          value: "$(POD_NAME##*-)"  # kafka-0 -> 0, kafka-1 -> 1, kafka-2 -> 2
+        - name: KAFKA_PROCESS_ROLES
+          value: "broker,controller"
+        # 클러스터 모드: 3개 노드 모두 quorum voters에 포함
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "0@kafka-0.kafka.kafka-nm.svc.cluster.local:9093,1@kafka-1.kafka.kafka-nm.svc.cluster.local:9093,2@kafka-2.kafka.kafka-nm.svc.cluster.local:9093"
+
+        # 리스너 설정
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://:9092,CONTROLLER://:9093"
+        # 클러스터 모드: 각 pod마다 고유한 advertised listener
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://$(POD_NAME).kafka.kafka-nm.svc.cluster.local:9092"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "PLAINTEXT"
+
+        # 클러스터 ID (KRaft 필수) - 모든 노드가 동일한 CLUSTER_ID 사용
+        - name: CLUSTER_ID
+          value: "MkU3OEVBNTcwNTJENDM2Qk"
+
+        # 로그 디렉토리
+        - name: KAFKA_LOG_DIRS
+          value: "/var/lib/kafka/data"
+
+        # 클러스터 모드 설정: 복제 계수 3
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "2"  # 최소 2개 노드에 복제되어야 함
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: "3"  # 토픽 생성 시 기본 복제 계수
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: "2"  # 최소 2개 replica가 sync되어야 함
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "true"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        volumeMounts:
+        - name: kafka-data
+          mountPath: /var/lib/kafka/data
+
+        # 헬스체크 - Kafka 준비 확인
+        livenessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+  volumeClaimTemplates:
+  - metadata:
+      name: kafka-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi  # 클러스터 모드에서는 각 노드마다 1Gi, 총 3Gi 사용
