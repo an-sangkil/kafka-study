@@ -21,7 +21,7 @@ spec:
   - type: kafka
     metadata:
       # Kafka 브로커 주소
-      bootstrapServers: kafka:9092
+      bootstrapServers: kafka.kafka-keda-study.svc.cluster.local:9092
       # 모니터링할 컨슈머 그룹
       consumerGroup: order-processing-group
       # 모니터링할 토픽
