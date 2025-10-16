@@ -8,13 +8,22 @@ kubectl get pods -n {namespace}
   - argocd : argocd 모듈
   - keda : keda core 모듈 
 
-##### 서비스 시작  
+##### 서비스 시작
+```bash
+# 카프카 싱글 모드 (yaml 에 네임스페이스 지정됨) 
 kubectl apply -f ./k8s/kafka-deployment.yaml
+kubectl apply -f ./k8s/kafka-deployment-cluster.yaml
 kubectl apply -f ./k8s/keda-scaledobject.yaml
+```
 
 ##### 서비스 삭제 및 종료 
+```bash
+# 카프카 싱글 모드 
 kubectl delete -f ./k8s/kafka-deployment.yaml
+
+# keda application
 kubectl delete -f ./k8s/keda-scaledobject.yaml
+```
 
 
 ##### statefulset 및 pvc 삭제
@@ -55,6 +64,8 @@ kubectl logs -f -l app=kafka-keda-skeleton -n order-service
 
 
 
+### 로그 확인 
+kubectl logs -f  kafka-0 -n kafka-nm
 
 ##### kafka
 토픽 저보 확인 

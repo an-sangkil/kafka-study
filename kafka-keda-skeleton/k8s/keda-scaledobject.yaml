@@ -1,3 +1,12 @@
+# keda-scaledobject.yaml
+# ----------------------------------------
+# KEDA 가 동작되는 k8s yaml
+# .deployment 된 application pod 를 kafka leg 를 감시하고
+#  leg 범위가 1000 이상 차날때
+#
+# ----------------------------------------
+
+
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
