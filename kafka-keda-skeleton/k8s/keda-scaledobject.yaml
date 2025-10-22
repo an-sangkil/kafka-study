@@ -4,6 +4,8 @@
 # .deployment 된 application pod 를 kafka leg 를 감시하고
 #  leg 범위가 1000 이상 차날때
 #
+# kubectl apply -f ./keda-scaledobject.yaml
+# kubectl logs -f -l  app=kafka-keda-skeleton -n order-service
 # ----------------------------------------
 
 
