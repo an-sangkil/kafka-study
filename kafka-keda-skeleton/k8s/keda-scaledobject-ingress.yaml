@@ -1,16 +1,14 @@
-# keda-scaledobject.yaml
+# keda-scaledobject-ingress.yaml
 # ----------------------------------------
-# KEDA 가 동작되는 k8s yaml
-# .deployment 된 application pod 를 kafka leg 를 감시하고
-#  leg 범위가 1000 이상 차날때
+# Ingress Nginx를 사용하는 KEDA 설정
+# L7 로드밸런싱으로 path 기반 라우팅 지원
 #
-# ----------------------------------------
-# kubectl apply -f ./keda-scaledobject.yaml
-# kubectl logs -f -l  app=kafka-keda-skeleton -n order-service
-# ----------------------------------------
-# LoadBalancer Type으로 L4/L7을 붙여서 사용한다.
-# 로컬에서 테스트 하기 위해서는 port-forwarding 한다.
-# kubectl port-forward service/kafka-keda-skeleton-service 8080:8080 -n order-service
+# Prerequisites:
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml
+#
+# kubectl apply -f ./keda-scaledobject-ingress.yaml
+# kubectl get ingress -n order-service
+# kubectl logs -f -l app=kafka-keda-skeleton -n order-service
 # ----------------------------------------
 
 
@@ -23,15 +21,15 @@ spec:
   # 스케일링 대상 Deployment
   scaleTargetRef:
     name: kafka-keda-skeleton-deployment
-  
+
   # 스케일링 범위 설정
   minReplicaCount: 1    # 최소 pod 개수
   maxReplicaCount: 10   # 최대 pod 개수
-  
+
   # 스케일링 정책
   pollingInterval: 30   # KEDA가 메트릭을 체크하는 주기 (초)
   cooldownPeriod: 300   # 스케일 다운 대기시간 (초)
-  
+
   # Kafka 컨슈머 lag 기반 트리거
   triggers:
   - type: kafka
@@ -113,4 +111,38 @@ spec:
   - protocol: TCP
     port: 8080
     targetPort: 8080
-  type: LoadBalancer
+  type: ClusterIP  # LoadBalancer에서 ClusterIP로 변경
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kafka-keda-skeleton-ingress
+  namespace: order-service
+  annotations:
+    # Nginx Ingress Controller 사용
+    kubernetes.io/ingress.class: nginx
+    # SSL 리다이렉트 비활성화 (개발환경)
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # 타임아웃 설정
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+spec:
+  rules:
+  # 도메인 기반 라우팅 (선택사항)
+  # - host: kafka-skeleton.example.com
+  - http:
+      paths:
+      # Path 기반 라우팅
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kafka-keda-skeleton-service
+            port:
+              number: 8080
+  # TLS 설정 (선택사항)
+  # tls:
+  # - hosts:
+  #   - kafka-skeleton.example.com
+  #   secretName: kafka-skeleton-tls
