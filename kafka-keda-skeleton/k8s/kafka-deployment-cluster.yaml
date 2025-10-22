@@ -119,8 +119,8 @@ metadata:
     app: kafka
 spec:
   serviceName: kafka
-  replicas: 3  # 클러스터 모드: 3개의 Kafka 브로커
-  podManagementPolicy: Parallel  # 모든 Pod를 동시에 생성
+  replicas: 3                     # 클러스터 모드: 3개의 Kafka 브로커
+  podManagementPolicy: Parallel   # 모든 Pod를 동시에 생성
   selector:
     matchLabels:
       app: kafka
