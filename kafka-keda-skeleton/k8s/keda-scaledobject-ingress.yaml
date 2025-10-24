@@ -11,7 +11,19 @@
 # kubectl logs -f -l app=kafka-keda-skeleton -n order-service
 # ----------------------------------------
 
-
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  namespace: order-service
+data:
+  # 호스트 머신의 Docker Compose Kafka 클러스터
+  bootstrap.servers: "host.docker.internal:9092,host.docker.internal:9093,host.docker.internal:9094"
+  #bootstrap.servers: "kafka.kafka-nm.svc.cluster.local:9092"    # k8s 내부
+  consumer.group.id: "order-processing-group"
+  spring.profiles.active: "k8s"
+  topic.order-events: "order-events"
+---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -34,8 +46,9 @@ spec:
   triggers:
   - type: kafka
     metadata:
-      # Kafka 브로커 주소
-      bootstrapServers: kafka.kafka-nm.svc.cluster.local:9092
+      # Kafka 브로커 주소 (호스트 머신의 Docker Compose 클러스터)
+      bootstrapServers: host.docker.internal:9092,host.docker.internal:9093,host.docker.internal:9094
+      #bootstrapServers: kafka.kafka-nm.svc.cluster.local:9092
       # 모니터링할 컨슈머 그룹
       consumerGroup: order-processing-group
       # 모니터링할 토픽
@@ -69,12 +82,24 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        # Kafka 브로커 주소 (k8s 내부)
+        # Kafka 브로커 주소 (ConfigMap에서 가져오기)
         - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-          value: "kafka.kafka-nm.svc.cluster.local:9092"
-        # 컨슈머 그룹 설정
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: bootstrap.servers
+        # 컨슈머 그룹 설정 (ConfigMap에서 가져오기)
         - name: SPRING_KAFKA_CONSUMER_GROUP_ID
-          value: "order-processing-group"
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: consumer.group.id
+        # Spring 프로필 설정 (ConfigMap에서 가져오기)
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: spring.profiles.active
         # 애플리케이션 이름
         - name: SPRING_APPLICATION_NAME
           value: "kafka-skeleton"
@@ -119,8 +144,6 @@ metadata:
   name: kafka-keda-skeleton-ingress
   namespace: order-service
   annotations:
-    # Nginx Ingress Controller 사용
-    kubernetes.io/ingress.class: nginx
     # SSL 리다이렉트 비활성화 (개발환경)
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     # 타임아웃 설정
@@ -128,6 +151,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 spec:
+  ingressClassName: nginx # Nginx Ingress Controller 사용
   rules:
   # 도메인 기반 라우팅 (선택사항)
   # - host: kafka-skeleton.example.com
