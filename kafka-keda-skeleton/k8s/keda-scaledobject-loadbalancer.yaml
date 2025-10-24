@@ -36,7 +36,7 @@ spec:
   triggers:
   - type: kafka
     metadata:
-      # Kafka 브로커 주소
+      # Kafka 브로커 주소(k8s 내부)
       bootstrapServers: kafka.kafka-nm.svc.cluster.local:9092
       # 모니터링할 컨슈머 그룹
       consumerGroup: order-processing-group
