@@ -11,8 +11,17 @@ spring:
         default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
         request.timeout.ms: 30000
         default.api.timeout.ms: 60000
+        reconnect.backoff.ms: 1000
+        reconnect.backoff.max.ms: 10000
+        retry.backoff.ms: 1000
+
     producer:
       properties:
         allow.auto.create.topics: true
     admin:
       auto-create: true
+
+logging:
+  level:
+    org.apache.kafka: WARN
+    org.apache.kafka.clients.admin: DEBUG
