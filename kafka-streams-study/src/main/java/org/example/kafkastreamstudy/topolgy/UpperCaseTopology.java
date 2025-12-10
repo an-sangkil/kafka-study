@@ -1,4 +1,4 @@
-package org.example.kafkastreamstudy;
+package org.example.kafkastreamstudy.topolgy;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -10,7 +10,7 @@ import org.springframework.kafka.annotation.EnableKafkaStreams;
 
 @Configuration
 @EnableKafkaStreams
-public class KafkaStreamConfig {
+public class UpperCaseTopology {
 
     @Bean
     public KStream<String, String> kStream(StreamsBuilder streamsBuilder) {
