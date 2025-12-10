@@ -1,0 +1,103 @@
+spring:
+  profiles:
+    group:
+      default: kafka-local
+      kafka-cluster: cluster-mode, common
+      kafka-local: single-node, common
+      local: single-node, common
+      dev: kafka-cluster, common
+
+server:
+  port: 8080
+---
+spring:
+  config:
+    activate:
+      on-profile: single-node
+  application:
+    name: kafka-skeleton
+
+  kafka:
+    #bootstrap-servers: localhost:9092 # docker 전용
+    bootstrap-servers: localhost:30092 # kubernetes
+    consumer:
+      group-id: order-processing-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+    listener:
+      ack-mode: manual
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+app:
+  kafka:
+    topic:
+      order-events: order-events
+
+---
+spring:
+  config:
+    activate:
+      on-profile: cluster-mode
+
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094    # local docker-compose
+    #bootstrap-servers: localhost:30092,localhost:30093,localhost:30094  # local minikube kubernetes
+    #bootstrap-servers: 192.168.5.15:30092,192.168.5.15:30093,192.168.5.15:30094 # kubernetes
+    consumer:
+      group-id: order-processing-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+    listener:
+      ack-mode: manual
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+app:
+  kafka:
+    topic:
+      order-events: order-events
+
+---
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+  kafka:
+    # Kubernetes Pod에서 호스트 머신의 Docker Compose Kafka 클러스터로 접근
+    bootstrap-servers: host.docker.internal:9092,host.docker.internal:9093,host.docker.internal:9094
+    consumer:
+      group-id: order-processing-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+    listener:
+      ack-mode: manual
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+app:
+  kafka:
+    topic:
+      order-events: order-events

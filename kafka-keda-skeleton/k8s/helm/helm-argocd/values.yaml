@@ -1,0 +1,59 @@
+# values.yaml
+# ===================================================
+# Argo CD 헬름 설치 시 사용자 정의 설정 파일
+# 로컬 Rancher Desktop 환경용 (Ingress 포함)
+# ===================================================
+
+server:
+  # Argo CD 서버(웹 UI) Ingress 설정
+  ingress:
+    enabled: true               # Ingress 사용 여부
+    ingressClassName: "nginx"   # 사용할 Ingress Controller 클래스 이름
+    hosts:
+      - argocd.example.com        # 접근할 도메인 (로컬에서는 /etc/hosts에 등록)
+    paths:
+      - /                       # 기본 경로
+    annotations:
+      kubernetes.io/ingress.class: nginx  # Ingress Controller 식별용 어노테이션
+      #nginx.ingress.kubernetes.io/rewrite-target: /  # 경로 재작성 설정
+    tls: []                     # 로컬 테스트이므로 TLS(https) 비활성화
+
+  service:
+    type: ClusterIP             # 기본 내부 서비스 타입 (LoadBalancer 아님)
+
+  extraArgs:
+    - --insecure                # self-signed 인증서 경고 무시 (로컬 환경 편의용)
+
+configs:
+  cm:
+    timeout.reconciliation: 180s  # 앱 동기화 주기 (기본 180초)
+
+controller:
+  # Argo CD Application Controller 리소스 제한 설정
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+repoServer:
+  # Git Repo에서 매니페스트를 처리하는 Repo Server 리소스 설정
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+redis:
+  # 캐싱용 Redis 리소스 설정 (Argo CD 내부 구성요소)
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
