@@ -1,1 +1,16 @@
-/.idea/
+
+# macOS
+.DS_Store
+
+# Kafka logs
+kafka-logs/
+**/kafka-logs/
+
+# IDE
+.idea/
+*.iml
+
+# Build artifacts
+build/
+.gradle/
+target/
