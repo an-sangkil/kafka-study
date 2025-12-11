@@ -1,0 +1,79 @@
+####AKHQ
+# helm-kafka-values.yaml
+# ===================================================
+# KAFKA 헬름 설치 시 사용자 정의 설정 파일
+#
+# ===================================================
+
+# replicaCount: 클러스터의 Kafka 브로커 수를 지정합니다.
+# kubectl 파일의 replicas: 3에 해당합니다.
+replicaCount: 3
+
+# image: 사용하려는 Kafka 이미지와 태그를 설정합니다.
+image:
+  repository: confluentinc/cp-kafka
+  tag: 7.5.0
+  pullPolicy: IfNotPresent
+
+# kraft: Kraft 모드 설정을 관리합니다.
+# `kubectl` 파일의 `KAFKA_PROCESS_ROLES`와 `KAFKA_CONTROLLER_QUORUM_VOTERS` 같은 복잡한 설정은
+# 대부분의 Helm 차트가 이 섹션에서 자동으로 처리합니다.
+kraft:
+  enabled: true
+  zookeeperCluster:
+    enabled: false
+  # clusterId는 일반적으로 Helm이 자동으로 생성하므로,
+  # 이 값은 특별한 경우가 아니면 비워두는 것이 좋습니다.
+  clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
+
+# service: 쿠버네티스 서비스 설정을 정의합니다.
+service:
+  type: ClusterIP  # Headless Service는 차트 내부에서 관리됩니다.
+  client:
+    port: 9092
+  controller:
+    port: 9093
+
+# listeners: Kafka 리스너 설정을 정의합니다.
+# `kubectl` 파일에서는 각 Pod에 맞춰 리스너 주소를 동적으로 설정해야 했지만,
+# Helm은 템플릿 기능을 사용해 이를 자동으로 처리합니다.
+listeners:
+  plain:
+    port: 9092
+    advertisedHost: "{{ .Release.Name }}-kafka-{{ .StatefulSet.Ordinal }}.{{ .Release.Name }}-kafka.{{ .Release.Namespace }}.svc.cluster.local"
+    # Note: advertisedHost는 Helm 템플릿 문법으로 동적 Pod 이름을 처리합니다.
+    advertisedPort: 9092
+
+# persistence: 각 Kafka 브로커의 영구 볼륨(PVC) 설정을 관리합니다.
+persistence:
+  enabled: true
+  storageClass: "standard" # 실제 스토리지 클래스 이름으로 변경
+  size: "1Gi"
+
+# resources: 컨테이너의 CPU/메모리 리소스 요청 및 제한을 설정합니다.
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+# kafkaConfigs: Kafka 브로커의 세부 속성들을 설정합니다.
+# `kubectl` 파일의 `KAFKA_...` 환경 변수들이 여기에 속합니다.
+kafkaConfigs:
+  offsets.topic.replication.factor: 3
+  transaction.state.log.replication.factor: 3
+  transaction.state.log.min.isr: 2
+  default.replication.factor: 3
+  min.insync.replicas: 2
+  auto.create.topics.enable: "true"
+
+# container: Liveness 및 Readiness 프로브 설정을 정의합니다.
+container:
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
