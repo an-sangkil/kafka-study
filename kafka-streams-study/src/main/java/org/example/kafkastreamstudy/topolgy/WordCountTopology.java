@@ -27,6 +27,14 @@ import java.util.Map;
 @Configuration
 public class WordCountTopology {
 
+    /**
+     * 윈도우 캐싱기반이 아니기때문에 누적으로 계속 카운트 된다.
+     *
+     * 케싱된 KWordCount
+     * RocksDB 보관기관은 7일 이며, 자동 생성되는 chnageLog는 7일 보관, 512MB의 세그먼트를 가진다.
+     * @param streamsBuilder
+     * @return
+     */
     @Bean
     public KStream<String, Long> kWordCountStream(StreamsBuilder streamsBuilder) {
 
