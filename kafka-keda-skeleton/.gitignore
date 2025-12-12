@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+/k8s/argo-cd-8.6.0.tgz
+/k8s/argo-cd/
+/kafka-logs/
