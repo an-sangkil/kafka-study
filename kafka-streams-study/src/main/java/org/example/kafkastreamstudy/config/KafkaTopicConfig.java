@@ -52,4 +52,14 @@ public class KafkaTopicConfig {
                 .replicas(1)
                 .build();
     }
+
+    @Bean
+    public NewTopic inputWordCountWindowTopic(){
+        return TopicBuilder.name("input-wordcount-window-topic").partitions(1).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic outputWordCountWindowTopic(){
+        return TopicBuilder.name("output-wordcount-window-topic").partitions(1).replicas(1).build();
+    }
 }

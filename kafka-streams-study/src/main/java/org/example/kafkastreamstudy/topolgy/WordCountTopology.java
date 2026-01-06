@@ -52,8 +52,8 @@ public class WordCountTopology {
 
                         Materialized.<String, Long, KeyValueStore<Bytes, byte[]>>as("wordcount-store")
 
-                                .withCachingEnabled()               // 케싱
-                                .withLoggingEnabled(logConfig)      // changelog 토픽 생성 설정
+                                .withCachingEnabled()                   // 케싱
+                                .withLoggingEnabled(logConfig)          // changelog 토픽 생성 설정
                                 .withRetention(Duration.ofMinutes(7))  // 로컬 Rocks db 보관 기관
 
                 ); // ktable로 상태 저장 (stateful)
