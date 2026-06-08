@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: kafka-stream-study
+  kafka:
+    bootstrap-servers: localhost:9092
+    streams:
+      application-id: kafka-stream-study-app
+      bootstrap-servers: localhost:9092
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        request.timeout.ms: 30000
+        default.api.timeout.ms: 60000
+        reconnect.backoff.ms: 1000
+        reconnect.backoff.max.ms: 10000
+        retry.backoff.ms: 1000
+
+    producer:
+      properties:
+        allow.auto.create.topics: true
+    admin:
+      auto-create: true
+
+logging:
+  level:
+    root: info
+    org.apache.kafka: WARN
+    org.apache.kafka.clients.admin: DEBUG
